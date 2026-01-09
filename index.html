@@ -68,14 +68,6 @@ header{
   color:#fff;
   font-weight:800;
   text-align:center;
-  overflow:hidden;
-}
-
-.logo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:none;
 }
 
 /* HEADER TEXT */
@@ -132,6 +124,16 @@ header{
   box-shadow:var(--shadow);
   border-top:6px solid #0f7a3d;
   margin-bottom:16px;
+}
+
+/* IMAGE DISPLAY */
+.display-img{
+  width:100%;
+  max-width:400px;
+  border-radius:12px;
+  border:2px solid #0f7a3d;
+  display:block;
+  margin:auto;
 }
 
 /* INPUTS */
@@ -208,8 +210,7 @@ footer{
 
 <header>
   <div class="logo">
-    <img id="logoPreview">
-    <span id="logoText">SUPPLY<br>SYNC</span>
+    SUPPLY<br>SYNC
   </div>
 
   <div>
@@ -237,9 +238,10 @@ footer{
 
 <main>
 
+<!-- IMAGE DISPLAY -->
 <div class="card">
-  <strong>Upload Company Logo</strong><br><br>
-  <input type="file" accept="image/*" onchange="uploadLogo(event)">
+  <h3>System Image</h3>
+  <img src="image.jpg" alt="Displayed Image" class="display-img">
 </div>
 
 <div class="card">
@@ -280,18 +282,6 @@ Page Last Updated: <span id="date"></span>
 
 <script>
 document.getElementById("date").textContent = new Date().toLocaleString();
-
-function uploadLogo(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e=>{
-    logoPreview.src = e.target.result;
-    logoPreview.style.display="block";
-    logoText.style.display="none";
-  };
-  reader.readAsDataURL(file);
-}
 
 let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
 
