@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Luis Y. Ferrer Jr. SHS — Supply Inventory</title>
+<title>Luis Y. Ferrer Jr. SHS — Inventory Supply System</title>
 
 <style>
 :root{
@@ -58,7 +58,7 @@ header{
   gap:20px;
 }
 
-/* BIG LOGO */
+/* HEADER LOGO */
 .logo{
   width:140px;
   height:140px;
@@ -75,6 +75,7 @@ header{
   box-shadow:0 0 15px rgba(0,255,102,.6);
 }
 
+/* HEADER TEXT */
 .blink{
   font-size:26px;
   font-weight:800;
@@ -87,8 +88,12 @@ header{
   100%{color:#0f7a3d}
 }
 
-.subtitle{color:#555;font-size:14px}
+.subtitle{
+  color:#555;
+  font-size:14px;
+}
 
+/* MAIN */
 .main{
   display:grid;
   grid-template-columns:260px 1fr;
@@ -116,7 +121,9 @@ header{
   color:#111;
 }
 
-.attach img{width:36px}
+.attach img{
+  width:36px;
+}
 
 /* CARD */
 .card{
@@ -128,6 +135,17 @@ header{
   margin-bottom:16px;
 }
 
+/* SCHOOL LOGO UPLOAD */
+.school-logo{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #0f7a3d;
+  margin-bottom:10px;
+  display:none;
+}
+
 /* SEARCH */
 #searchInput{
   width:100%;
@@ -137,7 +155,6 @@ header{
   border:1px solid #00ff66;
   background:#020d08;
   color:#00ff66;
-  box-shadow:0 0 10px rgba(0,255,102,.4);
 }
 
 /* TABLE */
@@ -150,7 +167,6 @@ table{
 th, td{
   padding:10px;
   border-bottom:1px solid #ddd;
-  text-align:left;
 }
 
 th{
@@ -158,19 +174,33 @@ th{
   color:#fff;
 }
 
-.stock-low{color:#c62828;font-weight:bold}
-.stock-ok{color:#0f7a3d;font-weight:bold}
+.stock-low{
+  color:#c62828;
+  font-weight:bold;
+}
+
+.stock-ok{
+  color:#0f7a3d;
+  font-weight:bold;
+}
 
 footer{
   text-align:center;
   font-size:13px;
   color:#555;
+  margin-top:20px;
 }
 
 /* RESPONSIVE */
 @media(max-width:860px){
-  .main{grid-template-columns:1fr}
-  .logo{width:110px;height:110px;font-size:14px}
+  .main{
+    grid-template-columns:1fr;
+  }
+  .logo{
+    width:110px;
+    height:110px;
+    font-size:14px;
+  }
 }
 </style>
 </head>
@@ -180,7 +210,7 @@ footer{
 <!-- OPENING -->
 <div class="opening">
   <h1>
-    Welcome to SupplySync<br>
+    Welcome to the Inventory Supply System<br>
     <small>Luis Y. Ferrer Jr. Senior High School</small>
   </h1>
 </div>
@@ -189,11 +219,12 @@ footer{
 
 <header>
   <div class="logo">
-    SUPPLY<br>SYNC<br>
+    LUIS Y.<br>FERRER JR.<br>SHS
   </div>
+
   <div>
-    <div class="blink">SUPPLY SYNC</div>
-    <div class="subtitle">Supply Inventory System</div>
+    <div class="blink">LUIS Y. FERRER JR. SENIOR HIGH SCHOOL</div>
+    <div class="subtitle">Inventory Supply System</div>
   </div>
 </header>
 
@@ -203,71 +234,70 @@ footer{
 <aside class="sidebar">
   <a class="attach" href="https://docs.google.com" target="_blank">
     <img src="https://www.gstatic.com/images/branding/product/1x/docs_2020q4_48dp.png">
-    Supplies Sheet
+    Inventory Supply Sheet
   </a>
+
   <a class="attach" href="https://lookerstudio.google.com" target="_blank">
     <img src="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png">
-    Dashboard
+    Inventory Dashboard
   </a>
 </aside>
 
 <!-- MAIN -->
 <main>
 
+<!-- LOGO UPLOAD ABOVE SEARCH -->
+<div class="card" style="text-align:center;">
+  <img id="schoolLogo" class="school-logo">
+  <input type="file" accept="image/*" onchange="uploadSchoolLogo(event)">
+</div>
+
 <!-- SEARCH -->
 <div class="card">
-  <input id="searchInput" type="text" placeholder="Search by name or category..." onkeyup="searchInventory()">
+  <input 
+    id="searchInput"
+    type="text"
+    placeholder="Search supply name or category..."
+    onkeyup="searchInventory()">
 </div>
 
 <!-- INVENTORY TABLE -->
 <section class="card">
-  <table id="inventoryTable">
-    <thead>
-      <tr>
-        <th>Supply Name</th>
-        <th>Category</th>
-        <th>Stock</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Ballpen</td>
-        <td>Writing Materials</td>
-        <td>120</td>
-        <td class="stock-ok">In Stock</td>
-      </tr>
-      <tr>
-        <td>Notebook</td>
-        <td>Paper Supplies</td>
-        <td>60</td>
-        <td class="stock-ok">In Stock</td>
-      </tr>
-      <tr>
-        <td>Chalk</td>
-        <td>Classroom Supplies</td>
-        <td>15</td>
-        <td class="stock-low">Low Stock</td>
-      </tr>
-      <tr>
-        <td>Bond Paper A4</td>
-        <td>Paper Supplies</td>
-        <td>300</td>
-        <td class="stock-ok">In Stock</td>
-      </tr>
-      <tr>
-        <td>Marker</td>
-        <td>Writing Materials</td>
-        <td>20</td>
-        <td class="stock-low">Low Stock</td>
-      </tr>
-    </tbody>
-  </table>
+<table id="inventoryTable">
+<thead>
+<tr>
+  <th>Supply Name</th>
+  <th>Category</th>
+  <th>Stock</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Bond Paper</td>
+  <td>Office Supplies</td>
+  <td>300</td>
+  <td class="stock-ok">In Stock</td>
+</tr>
+<tr>
+  <td>Ballpen</td>
+  <td>Office Supplies</td>
+  <td>40</td>
+  <td class="stock-low">Low Stock</td>
+</tr>
+<tr>
+  <td>Alcohol</td>
+  <td>Cleaning Supplies</td>
+  <td>25</td>
+  <td class="stock-low">Low Stock</td>
+</tr>
+</tbody>
+</table>
 </section>
 
 <footer>
-  THANK YOU!<br>
-  Page Last Updated: <span id="date"></span>
+THANK YOU!<br>
+Page Last Updated: <span id="date"></span>
 </footer>
 
 </main>
@@ -275,16 +305,29 @@ footer{
 </div>
 
 <script>
-document.getElementById("date").textContent = new Date().toLocaleString();
+document.getElementById("date").textContent =
+  new Date().toLocaleString();
 
 function searchInventory(){
   let input = document.getElementById("searchInput").value.toLowerCase();
   let rows = document.querySelectorAll("#inventoryTable tbody tr");
-
   rows.forEach(row=>{
-    let text = row.textContent.toLowerCase();
-    row.style.display = text.includes(input) ? "" : "none";
+    row.style.display =
+      row.textContent.toLowerCase().includes(input) ? "" : "none";
   });
+}
+
+function uploadSchoolLogo(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = document.getElementById("schoolLogo");
+    img.src = e.target.result;
+    img.style.display = "block";
+  };
+  reader.readAsDataURL(file);
 }
 </script>
 
