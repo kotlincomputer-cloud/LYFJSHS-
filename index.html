@@ -1,10 +1,9 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Luis Y. Ferrer Jr. SHS — Inventory Supply System</title>
+<title>SupplySync — Supply Inventory Tracking System</title>
 
 <style>
 :root{
@@ -26,19 +25,18 @@ html,body{
 .opening{
   position:fixed;
   inset:0;
-  background:linear-gradient(180deg,#020d08,#000);
+  background:#020d08;
   display:flex;
   align-items:center;
   justify-content:center;
   z-index:9999;
   animation:fadeOut 1.5s ease forwards;
-  animation-delay:4s;
+  animation-delay:3s;
 }
 
 .opening h1{
   color:var(--green);
   text-align:center;
-  text-shadow:0 0 15px rgba(0,255,102,.8);
 }
 
 @keyframes fadeOut{
@@ -58,21 +56,26 @@ header{
   gap:20px;
 }
 
-/* HEADER LOGO */
+/* LOGO */
 .logo{
   width:140px;
   height:140px;
   border-radius:50%;
-  background:linear-gradient(135deg,#0f7a3d,#2ecc71);
+  background:#0f7a3d;
   display:flex;
   align-items:center;
   justify-content:center;
   color:#fff;
   font-weight:800;
   text-align:center;
-  font-size:16px;
-  line-height:1.3;
-  box-shadow:0 0 15px rgba(0,255,102,.6);
+  overflow:hidden;
+}
+
+.logo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none;
 }
 
 /* HEADER TEXT */
@@ -88,10 +91,7 @@ header{
   100%{color:#0f7a3d}
 }
 
-.subtitle{
-  color:#555;
-  font-size:14px;
-}
+.subtitle{color:#555;font-size:14px}
 
 /* MAIN */
 .main{
@@ -112,6 +112,7 @@ header{
 
 .attach{
   display:flex;
+  align-items:center;
   gap:10px;
   padding:10px;
   border:1px solid #e5e7eb;
@@ -121,9 +122,7 @@ header{
   color:#111;
 }
 
-.attach img{
-  width:36px;
-}
+.attach img{width:32px}
 
 /* CARD */
 .card{
@@ -135,26 +134,32 @@ header{
   margin-bottom:16px;
 }
 
-/* SCHOOL LOGO UPLOAD */
-.school-logo{
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  object-fit:cover;
-  border:3px solid #0f7a3d;
+/* INPUTS */
+input{
+  width:100%;
+  padding:10px;
   margin-bottom:10px;
-  display:none;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
+
+/* BUTTON */
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#0f7a3d;
+  color:#fff;
+  cursor:pointer;
+}
+
+button.delete{background:#c62828}
 
 /* SEARCH */
 #searchInput{
-  width:100%;
-  padding:12px;
-  font-size:15px;
-  border-radius:10px;
-  border:1px solid #00ff66;
   background:#020d08;
   color:#00ff66;
+  border:1px solid #00ff66;
 }
 
 /* TABLE */
@@ -167,6 +172,7 @@ table{
 th, td{
   padding:10px;
   border-bottom:1px solid #ddd;
+  text-align:center;
 }
 
 th{
@@ -174,44 +180,27 @@ th{
   color:#fff;
 }
 
-.stock-low{
-  color:#c62828;
-  font-weight:bold;
-}
-
-.stock-ok{
-  color:#0f7a3d;
-  font-weight:bold;
-}
+.stock-low{color:#c62828;font-weight:bold}
+.stock-ok{color:#0f7a3d;font-weight:bold}
 
 footer{
   text-align:center;
   font-size:13px;
   color:#555;
-  margin-top:20px;
 }
 
-/* RESPONSIVE */
 @media(max-width:860px){
-  .main{
-    grid-template-columns:1fr;
-  }
-  .logo{
-    width:110px;
-    height:110px;
-    font-size:14px;
-  }
+  .main{grid-template-columns:1fr}
 }
 </style>
 </head>
 
 <body>
 
-<!-- OPENING -->
 <div class="opening">
   <h1>
-    Welcome to the Inventory Supply System<br>
-    <small>Luis Y. Ferrer Jr. Senior High School</small>
+    Welcome to SupplySync<br>
+    <small>Supply Inventory Tracking System</small>
   </h1>
 </div>
 
@@ -219,12 +208,13 @@ footer{
 
 <header>
   <div class="logo">
-    LUIS Y.<br>FERRER JR.<br>SHS
+    <img id="logoPreview">
+    <span id="logoText">SUPPLY<br>SYNC</span>
   </div>
 
   <div>
-    <div class="blink">LUIS Y. FERRER JR. SENIOR HIGH SCHOOL</div>
-    <div class="subtitle">Inventory Supply System</div>
+    <div class="blink">SUPPLYSYNC</div>
+    <div class="subtitle">Supply Inventory Tracking System</div>
   </div>
 </header>
 
@@ -232,68 +222,52 @@ footer{
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <a class="attach" href="https://docs.google.com" target="_blank">
+  <p><strong>Inventory Links</strong></p>
+
+  <a class="attach" href="https://docs.google.com/spreadsheets" target="_blank">
     <img src="https://www.gstatic.com/images/branding/product/1x/docs_2020q4_48dp.png">
     Inventory Supply Sheet
   </a>
 
   <a class="attach" href="https://lookerstudio.google.com" target="_blank">
     <img src="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png">
-    Inventory Dashboard
+    Inventory Supply Dashboard
   </a>
 </aside>
 
-<!-- MAIN -->
 <main>
 
-<!-- LOGO UPLOAD ABOVE SEARCH -->
-<div class="card" style="text-align:center;">
-  <img id="schoolLogo" class="school-logo">
-  <input type="file" accept="image/*" onchange="uploadSchoolLogo(event)">
-</div>
-
-<!-- SEARCH -->
 <div class="card">
-  <input 
-    id="searchInput"
-    type="text"
-    placeholder="Search supply name or category..."
-    onkeyup="searchInventory()">
+  <strong>Upload Company Logo</strong><br><br>
+  <input type="file" accept="image/*" onchange="uploadLogo(event)">
 </div>
 
-<!-- INVENTORY TABLE -->
-<section class="card">
-<table id="inventoryTable">
-<thead>
-<tr>
-  <th>Supply Name</th>
-  <th>Category</th>
-  <th>Stock</th>
-  <th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>Bond Paper</td>
-  <td>Office Supplies</td>
-  <td>300</td>
-  <td class="stock-ok">In Stock</td>
-</tr>
-<tr>
-  <td>Ballpen</td>
-  <td>Office Supplies</td>
-  <td>40</td>
-  <td class="stock-low">Low Stock</td>
-</tr>
-<tr>
-  <td>Alcohol</td>
-  <td>Cleaning Supplies</td>
-  <td>25</td>
-  <td class="stock-low">Low Stock</td>
-</tr>
-</tbody>
-</table>
-</section>
+<div class="card">
+  <input id="searchInput" type="text"
+   placeholder="Search inventory..."
+   onkeyup="searchInventory()">
+</div>
+
+<div class="card">
+  <h3>Add Inventory Item</h3>
+  <input type="text" id="itemName" placeholder="Item Name">
+  <input type="number" id="itemQty" placeholder="Quantity">
+  <input type="number" id="itemPrice" placeholder="Price">
+  <button onclick="addItem()">Add Item</button>
+
+  <table id="inventoryTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="inventoryList"></tbody>
+  </table>
+</div>
 
 <footer>
 THANK YOU!<br>
@@ -305,30 +279,78 @@ Page Last Updated: <span id="date"></span>
 </div>
 
 <script>
-document.getElementById("date").textContent =
-  new Date().toLocaleString();
+document.getElementById("date").textContent = new Date().toLocaleString();
 
-function searchInventory(){
-  let input = document.getElementById("searchInput").value.toLowerCase();
-  let rows = document.querySelectorAll("#inventoryTable tbody tr");
-  rows.forEach(row=>{
-    row.style.display =
-      row.textContent.toLowerCase().includes(input) ? "" : "none";
-  });
-}
-
-function uploadSchoolLogo(event){
+function uploadLogo(event){
   const file = event.target.files[0];
   if(!file) return;
-
   const reader = new FileReader();
   reader.onload = e=>{
-    const img = document.getElementById("schoolLogo");
-    img.src = e.target.result;
-    img.style.display = "block";
+    logoPreview.src = e.target.result;
+    logoPreview.style.display="block";
+    logoText.style.display="none";
   };
   reader.readAsDataURL(file);
 }
+
+let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+
+function displayItems(){
+  const list = document.getElementById('inventoryList');
+  list.innerHTML = '';
+
+  inventory.forEach((item, index)=>{
+    let status = item.qty < 50
+      ? '<span class="stock-low">Low</span>'
+      : '<span class="stock-ok">OK</span>';
+
+    list.innerHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>₱${item.price}</td>
+        <td>${status}</td>
+        <td>
+          <button class="delete" onclick="deleteItem(${index})">Delete</button>
+        </td>
+      </tr>`;
+  });
+
+  localStorage.setItem('inventory', JSON.stringify(inventory));
+}
+
+function addItem(){
+  if(!itemName.value || !itemQty.value || !itemPrice.value){
+    alert('Fill all fields');
+    return;
+  }
+
+  inventory.push({
+    name:itemName.value,
+    qty:itemQty.value,
+    price:itemPrice.value
+  });
+
+  displayItems();
+  itemName.value='';
+  itemQty.value='';
+  itemPrice.value='';
+}
+
+function deleteItem(index){
+  inventory.splice(index,1);
+  displayItems();
+}
+
+function searchInventory(){
+  let input = searchInput.value.toLowerCase();
+  document.querySelectorAll("#inventoryTable tbody tr")
+    .forEach(row=>{
+      row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
+    });
+}
+
+displayItems();
 </script>
 
 </body>
