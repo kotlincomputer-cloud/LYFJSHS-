@@ -6,7 +6,7 @@
 
 <title>SupplySync — Supply Inventory Tracking System</title>
 
-<!-- FAVICON -->
+
 <link rel="icon" type="image/png" href="1768986500105.jpg">
 
 <style>
@@ -21,7 +21,7 @@ body{
   background:linear-gradient(180deg,#e8f5ee,#fff);
 }
 
-/* LOGIN */
+
 .login{
   max-width:300px;
   margin:80px auto;
@@ -37,8 +37,7 @@ body{
   object-fit:contain;
   margin-bottom:10px;
 }
-
-/* APP */
+  
 .wrap{display:none;max-width:1100px;margin:20px auto;padding:20px}
 header{display:flex;gap:20px;align-items:center}
 .logo{
@@ -140,7 +139,7 @@ footer{
   <button onclick="login()">Login</button>
 </div>
 
-<!-- APP -->
+
 <div class="wrap" id="app">
 <header>
   <div class="logo">
@@ -254,7 +253,7 @@ function display(){
   });
 }
 
-// Function to send data to Google Sheets
+
 function sendToSheet(item, action){
   const data = {
     timestamp: new Date().toLocaleString(),
