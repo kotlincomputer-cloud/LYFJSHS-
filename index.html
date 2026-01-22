@@ -7,8 +7,7 @@
 <title>SupplySync — Supply Inventory Tracking System</title>
 
 <!-- FAVICON -->
-<link rel="icon" type="image/png"
-href="1768986500105.jpg">
+<link rel="icon" type="image/png" href="1768986500105.jpg">
 
 <style>
 :root{
@@ -134,9 +133,7 @@ footer{
 
 <!-- LOGIN -->
 <div class="login" id="loginBox">
-  <img class="login-logo"
-  src="1768986500105.jpg">
-
+  <img class="login-logo" src="1768986500105.jpg">
   <h3>Admin Login</h3>
   <input id="username" placeholder="Username">
   <input id="password" type="password" placeholder="Password">
@@ -162,7 +159,6 @@ footer{
 </aside>
 
 <main>
-
 <div class="card">
 <h3>Add Item</h3>
 <input id="itemName" placeholder="Item Name">
@@ -206,8 +202,10 @@ Last Updated: <span id="date"></span>
 <div id="toast" class="toast"></div>
 
 <script>
-document.getElementById("date").textContent=new Date().toLocaleString();
-let inventory=[];
+document.getElementById("date").textContent = new Date().toLocaleString();
+let inventory = [];
+
+const SHEET_URL = "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE"; 
 
 function showToast(msg,type="success"){
   const t=document.getElementById("toast");
@@ -256,26 +254,63 @@ function display(){
   });
 }
 
+// Function to send data to Google Sheets
+function sendToSheet(item, action){
+  const data = {
+    timestamp: new Date().toLocaleString(),
+    name: item.name,
+    qty: item.qty,
+    price: item.price,
+    status: item.deleted ? "DELETED" : (item.qty<50 ? "Low" : "OK"),
+    action: action
+  };
+  
+  fetch(SHEET_URL,{
+    method:"POST",
+    body:JSON.stringify(data)
+  }).catch(err => console.error("Error sending to sheet:", err));
+}
+
 function addItem(){
-  inventory.push({
-    name:itemName.value,
-    qty:+itemQty.value,
-    price:+itemPrice.value,
-    deleted:false
-  });
+  if(!itemName.value || !itemQty.value || !itemPrice.value){
+    showToast("Complete all fields","error"); 
+    return;
+  }
+
+  const item = {
+    name: itemName.value,
+    qty: +itemQty.value,
+    price: +itemPrice.value,
+    deleted: false
+  };
+
+  inventory.push(item);
   display();
+  sendToSheet(item, "ADD");
+
+  itemName.value = itemQty.value = itemPrice.value = "";
+  showToast("Item added and saved to sheet");
 }
 
 function deleteSelected(){
-  inventory[selectActive.value].deleted=true;
+  const idx = selectActive.value;
+  if(idx==="") return;
+  inventory[idx].deleted = true;
   display();
+  sendToSheet(inventory[idx], "DELETE");
+  showToast("Item deleted and saved to sheet");
 }
 
 function retrieveSelected(){
-  inventory[selectDeleted.value].deleted=false;
+  const idx = selectDeleted.value;
+  if(idx==="") return;
+  inventory[idx].deleted = false;
   display();
+  sendToSheet(inventory[idx], "RETRIEVE");
+  showToast("Item retrieved and saved to sheet");
 }
 </script>
 
 </body>
 </html>
+
