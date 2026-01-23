@@ -29,10 +29,7 @@ body{
   box-shadow:var(--shadow);
   text-align:center;
 }
-.login-logo{
-  width:100px;
-  margin-bottom:10px;
-}
+.login-logo{width:100px;margin-bottom:10px}
 
 
 .wrap{display:none;max-width:1100px;margin:20px auto;padding:20px}
@@ -61,11 +58,7 @@ input,select{
 }
 
 
-.qty-price{
-  display:flex;
-  gap:8px;
-}
-
+.qty-price{display:flex;gap:8px}
 .qty-price input{
   width:90px !important;
   min-width:90px;
@@ -195,6 +188,23 @@ Last Updated: <span id="date"></span>
 document.getElementById("date").textContent=new Date().toLocaleString();
 let inventory=[];
 
+
+const SHEET_URL="https://script.google.com/macros/s/AKfycbxjX16ifmAOv1NmTpKjL-_CiHWgF37sKiXgQY3i6a1nY2pYOQt4SDU-sXMuFDqtGtU/exec";
+
+function sendToSheet(item,action){
+  fetch(SHEET_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      timestamp:new Date().toLocaleString(),
+      name:item.name,
+      qty:item.qty,
+      price:item.price,
+      status:item.deleted?"DELETED":(item.qty<50?"Low":"OK"),
+      action:action
+    })
+  });
+}
+
 function showToast(msg,type="success"){
   const t=document.getElementById("toast");
   t.textContent=msg;
@@ -243,34 +253,33 @@ function addItem(){
   if(!itemName.value||!itemQty.value||!itemPrice.value){
     showToast("Complete all fields","error");return;
   }
-  inventory.push({
+  const item={
     name:itemName.value,
     qty:+itemQty.value,
     price:+itemPrice.value,
     deleted:false
-  });
+  };
+  inventory.push(item);
   display();
+  sendToSheet(item,"ADD");
   itemName.value=itemQty.value=itemPrice.value="";
-  showToast("Item added");
+  showToast("Item saved to Google Sheets");
 }
 
 function deleteSelected(){
   if(selectActive.value==="")return;
   inventory[selectActive.value].deleted=true;
   display();
+  sendToSheet(inventory[selectActive.value],"DELETE");
 }
 
 function retrieveSelected(){
   if(selectDeleted.value==="")return;
   inventory[selectDeleted.value].deleted=false;
   display();
+  sendToSheet(inventory[selectDeleted.value],"RETRIEVE");
 }
 </script>
 
 </body>
 </html>
-
-
-
-
-
