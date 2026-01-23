@@ -60,15 +60,18 @@ input,select{
   border:1px solid #ccc;
 }
 
+
 .qty-price{
   display:flex;
-  gap:10px;
-  justify-content:center;
+  gap:8px;
 }
 
-.small-input{
-  width:120px;
+.qty-price input{
+  width:90px !important;
+  min-width:90px;
+  max-width:90px;
   text-align:center;
+  padding:8px;
 }
 
 
@@ -146,8 +149,8 @@ footer{text-align:center;font-size:13px;color:#555}
 <input id="itemName" placeholder="Item Name">
 
 <div class="qty-price">
-  <input id="itemQty" type="number" placeholder="Qty" class="small-input">
-  <input id="itemPrice" type="number" placeholder="Price" class="small-input">
+  <input id="itemQty" type="number" placeholder="Qty">
+  <input id="itemPrice" type="number" placeholder="Price">
 </div>
 
 <button onclick="addItem()">Add</button>
@@ -191,8 +194,6 @@ Last Updated: <span id="date"></span>
 <script>
 document.getElementById("date").textContent=new Date().toLocaleString();
 let inventory=[];
-
-const SHEET_URL="https://script.google.com/macros/s/AKfycbxMZydaSl4J54_ftUokSo1tpdsz1IaUKdk7trTRrnT6729RTQo9QFbPiEGnp7i1mbjb/exec";
 
 function showToast(msg,type="success"){
   const t=document.getElementById("toast");
@@ -238,28 +239,17 @@ function display(){
   });
 }
 
-function sendToSheet(item,action){
-  fetch(SHEET_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      timestamp:new Date().toLocaleString(),
-      name:item.name,
-      qty:item.qty,
-      price:item.price,
-      status:item.deleted?"DELETED":(item.qty<50?"Low":"OK"),
-      action:action
-    })
-  });
-}
-
 function addItem(){
   if(!itemName.value||!itemQty.value||!itemPrice.value){
     showToast("Complete all fields","error");return;
   }
-  const item={name:itemName.value,qty:+itemQty.value,price:+itemPrice.value,deleted:false};
-  inventory.push(item);
+  inventory.push({
+    name:itemName.value,
+    qty:+itemQty.value,
+    price:+itemPrice.value,
+    deleted:false
+  });
   display();
-  sendToSheet(item,"ADD");
   itemName.value=itemQty.value=itemPrice.value="";
   showToast("Item added");
 }
@@ -268,19 +258,19 @@ function deleteSelected(){
   if(selectActive.value==="")return;
   inventory[selectActive.value].deleted=true;
   display();
-  sendToSheet(inventory[selectActive.value],"DELETE");
 }
 
 function retrieveSelected(){
   if(selectDeleted.value==="")return;
   inventory[selectDeleted.value].deleted=false;
   display();
-  sendToSheet(inventory[selectDeleted.value],"RETRIEVE");
 }
 </script>
 
 </body>
 </html>
+
+
 
 
 
