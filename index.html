@@ -191,19 +191,31 @@ let inventory=[];
 
 const SHEET_URL="https://script.google.com/macros/s/AKfycbzSwFDfftIymqmlBSz29hUBC6CLbkd0nlAXuK48Ftdr2spmnCW1kq4NkSYNIzNrfMbc/exec";
 
-function sendToSheet(item,action){
-  fetch(SHEET_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      timestamp:new Date().toLocaleString(),
-      name:item.name,
-      qty:item.qty,
-      price:item.price,
-      status:item.deleted?"DELETED":(item.qty<50?"Low":"OK"),
-      action:action
+function sendToSheet(item, action){
+  fetch(SHEET_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      timestamp: new Date().toLocaleString(),
+      name: item.name,
+      qty: item.qty,
+      price: item.price,
+      status: item.deleted ? "DELETED" : (item.qty < 50 ? "Low" : "OK"),
+      action: action
     })
-  });
+  })
+  .then(res => res.text())
+  .then(msg => {
+    if(msg.toLowerCase().includes("update")){
+      showToast("Item updated in Google Sheets");
+    } else if(msg.toLowerCase().includes("added")){
+      showToast("Item added to Google Sheets");
+    } else {
+      showToast("Google Sheets: " + msg, "error");
+    }
+  })
+  .catch(err => showToast("Error sending to Google Sheets", "error"));
 }
+
 
 function showToast(msg,type="success"){
   const t=document.getElementById("toast");
