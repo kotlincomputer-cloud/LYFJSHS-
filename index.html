@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SupplySync — Supply Inventory Tracking System</title>
 <link rel="icon" type="image/png" href="1768986500105.jpg">
-
 <style>
 :root{
   --green:#0f7a3d;
@@ -52,8 +51,6 @@ input,select{
 .qty-price{display:flex;gap:8px}
 .qty-price input{
   width:90px !important;
-  min-width:90px;
-  max-width:90px;
   text-align:center;
   padding:8px;
 }
@@ -92,15 +89,13 @@ footer{text-align:center;font-size:13px;color:#555}
 </head>
 <body>
 
-
 <div class="login" id="loginBox">
-  <img class="login-logo" src="1768986500105.jpg">
-  <h3>Admin Login</h3>
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
+<img class="login-logo" src="1768986500105.jpg">
+<h3>Admin Login</h3>
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
 </div>
-
 
 <div class="wrap" id="app">
 <header>
@@ -126,11 +121,9 @@ footer{text-align:center;font-size:13px;color:#555}
   <input id="itemPrice" type="number" placeholder="Price">
 </div>
 <button onclick="addItem()">Add</button>
-
 <hr>
 <select id="selectActive"></select>
 <button class="delete" onclick="deleteSelected()">Delete</button>
-
 <table>
 <thead>
 <tr><th>Item</th><th>Qty</th><th>Price</th><th>Status</th></tr>
@@ -165,28 +158,25 @@ document.getElementById("date").textContent=new Date().toLocaleString();
 let inventory=[];
 
 
-const SHEET_URL="https://script.google.com/macros/s/AKfycbyT0frxE4Ffi1rbcc-JY1957y1VxxZw8gb5IbGUG59EaNG3ChJqVORzQHNeZTmRqsCYLA/exec";
+const SHEET_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
 
-
-function sendToSheet(item, action){
-  fetch(SHEET_URL, {
-    method: "POST",
+function sendToSheet(item,action){
+  fetch(SHEET_URL,{
+    method:"POST",
     body: JSON.stringify({
-      timestamp: new Date().toLocaleString(),
-      name: item.name,
-      qty: item.qty,
-      price: item.price,
-      status: item.deleted ? "DELETED" : (item.qty < 50 ? "Low" : "OK"),
-      action: action,
-      deleted: item.deleted
+      timestamp:new Date().toLocaleString(),
+      name:item.name,
+      qty:item.qty,
+      price:item.price,
+      status:item.deleted?"DELETED":(item.qty<50?"Low":"OK"),
+      action:action,
+      deleted:item.deleted
     })
   })
-  .then(res => res.text())
-  .then(msg => showToast(msg.includes("update") ? "Item updated" : "Item added"))
-  .catch(err => showToast("Error sending to Google Sheets", "error"));
+  .then(res=>res.text())
+  .then(msg=>showToast(msg.includes("Updated")?"Item updated":"Item added"))
+  .catch(err=>showToast("Error sending to Google Sheets","error"));
 }
-
-
 
 function showToast(msg,type="success"){
   const t=document.getElementById("toast");
@@ -196,7 +186,6 @@ function showToast(msg,type="success"){
   setTimeout(()=>t.className="toast",3000);
 }
 
-
 function login(){
   if(username.value==="admin" && password.value==="1234"){
     loginBox.style.display="none";
@@ -204,7 +193,6 @@ function login(){
     showToast("Login successful");
   }else showToast("Invalid login","error");
 }
-
 
 function display(){
   inventoryList.innerHTML="";
@@ -214,26 +202,25 @@ function display(){
   inventory.forEach((i,x)=>{
     if(!i.deleted){
       inventoryList.innerHTML+=`
-      <tr>
-        <td>${i.name}</td>
-        <td>${i.qty}</td>
-        <td>₱${i.price}</td>
-        <td class="${i.qty<50?'stock-low':'stock-ok'}">${i.qty<50?'Low':'OK'}</td>
-      </tr>`;
+        <tr>
+          <td>${i.name}</td>
+          <td>${i.qty}</td>
+          <td>₱${i.price}</td>
+          <td class="${i.qty<50?'stock-low':'stock-ok'}">${i.qty<50?'Low':'OK'}</td>
+        </tr>`;
       selectActive.innerHTML+=`<option value="${x}">${i.name}</option>`;
     }else{
       deletedList.innerHTML+=`
-      <tr class="deleted-item">
-        <td>${i.name}</td>
-        <td>${i.qty}</td>
-        <td>₱${i.price}</td>
-        <td>DELETED</td>
-      </tr>`;
+        <tr class="deleted-item">
+          <td>${i.name}</td>
+          <td>${i.qty}</td>
+          <td>₱${i.price}</td>
+          <td>DELETED</td>
+        </tr>`;
       selectDeleted.innerHTML+=`<option value="${x}">${i.name}</option>`;
     }
   });
 }
-
 
 function addItem(){
   if(!itemName.value||!itemQty.value||!itemPrice.value){
@@ -251,14 +238,12 @@ function addItem(){
   itemName.value=itemQty.value=itemPrice.value="";
 }
 
-
 function deleteSelected(){
   if(selectActive.value==="")return;
   inventory[selectActive.value].deleted=true;
   display();
   sendToSheet(inventory[selectActive.value],"DELETE");
 }
-
 
 function retrieveSelected(){
   if(selectDeleted.value==="")return;
@@ -269,4 +254,4 @@ function retrieveSelected(){
 </script>
 
 </body>
-</html>
+</ht
