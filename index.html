@@ -182,17 +182,10 @@ function sendToSheet(item, action){
     })
   })
   .then(res => res.text())
-  .then(msg => {
-    if(msg.toLowerCase().includes("update")){
-      showToast("Item updated in Google Sheets");
-    } else if(msg.toLowerCase().includes("added")){
-      showToast("Item added to Google Sheets");
-    } else {
-      showToast("Google Sheets: " + msg, "error");
-    }
-  })
+  .then(msg => showToast(msg.includes("update") ? "Item updated" : "Item added"))
   .catch(err => showToast("Error sending to Google Sheets", "error"));
 }
+
 
 
 function showToast(msg,type="success"){
