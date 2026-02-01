@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SupplySync — Supply Inventory Tracking System</title>
-
 <link rel="icon" type="image/png" href="1768986500105.jpg">
 
 <style>
@@ -34,9 +33,30 @@ body{
   width:100px;
   margin-bottom:10px;
 }
+.login input{
+  width:calc(100% - 20px); 
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+  display:block;
+}
+.login button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:var(--green);
+  color:#fff;
+  cursor:pointer;
+}
 
 
-.wrap{display:none;max-width:1100px;margin:20px auto;padding:20px}
+.wrap{
+  display:none;
+}
+
 
 header{
   display:flex;
@@ -61,19 +81,33 @@ header{
 }
 @keyframes blink{50%{color:var(--red)}}
 
+
 .main{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:260px 1fr;
   gap:20px;
   margin-top:20px;
 }
+
+
+.sidebar{
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  border-top:6px solid var(--green);
+  position:sticky;
+  top:20px;
+}
+
 
 .card{
   background:#fff;
   padding:20px;
   border-radius:14px;
-  box-shadow:var(--shadow);
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
   border-top:6px solid var(--green);
+  margin-bottom:20px;
 }
 
 
@@ -90,6 +124,7 @@ button{
   cursor:pointer;
 }
 button.delete{background:var(--red)}
+button.retrieve{background:var(--green)}
 
 table{
   width:100%;
@@ -104,16 +139,38 @@ th,td{
 th{background:var(--green);color:#fff}
 .stock-low{color:#c62828;font-weight:bold}
 .stock-ok{color:#0f7a3d;font-weight:bold}
+.deleted-item{color:#555;font-style:italic}
 
 
 .qty-price{
   display:flex;
-  gap:4px; 
+  gap:2px; 
 }
 .qty-price input{
-  width:70px; 
+  width:60px; 
   padding:6px;
   text-align:center;
+}
+
+
+@media (max-width:768px) {
+  .main{
+    grid-template-columns:1fr; 
+  }
+  .sidebar{
+    order:0;  
+    margin-bottom:20px;
+  }
+  .card{
+    margin-bottom:20px;
+  }
+  .qty-price{
+    flex-wrap: nowrap;
+    gap:2px;           
+  }
+  .qty-price input{
+    width:48%; 
+  }
 }
 </style>
 </head>
@@ -145,13 +202,23 @@ th{background:var(--green);color:#fff}
 <div class="main">
 
 
+<aside class="sidebar">
+<strong>Inventory Links</strong><br><br>
+<a href="https://docs.google.com/spreadsheets" target="_blank">📄 Google Sheets</a>
+</aside>
+
+
+<main>
+
 <div class="card">
 <h3>Add Item</h3>
 <input id="itemName" placeholder="Item Name">
+
 <div class="qty-price">
   <input id="itemQty" type="number" placeholder="Qty">
   <input id="itemPrice" type="number" placeholder="Price">
 </div>
+
 <button onclick="addItem()">Add</button>
 
 <hr>
@@ -171,7 +238,7 @@ th{background:var(--green);color:#fff}
 <div class="card">
 <h3>Deleted Items</h3>
 <select id="selectDeleted"></select>
-<button onclick="retrieveItem()">Retrieve</button>
+<button class="retrieve" onclick="retrieveItem()">Retrieve</button>
 
 <table>
 <thead>
@@ -180,21 +247,19 @@ th{background:var(--green);color:#fff}
 <tbody id="deletedList"></tbody>
 </table>
 </div>
+</main>
 
 </div>
 </div>
 
 <script>
-
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxy7S6XmSu_AMb14KThtKTEyWm5fB_Ts0i1NTlbSROhXJHTF8Lj4PQp-rUDo8uWMKJ3/exec";
-
-
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyu8yD7Ok62X-TSyTN49bSp2LOBSMR0Mu7f0TIWOXGVI487eMUjCioTrCbKWgUW_dYX/exec";
 let inventory = [];
-
 
 function uid(){
   return "ID-"+Date.now()+"-"+Math.floor(Math.random()*1000);
 }
+
 function send(item){
   fetch(SHEET_URL,{
     method:"POST",
@@ -203,16 +268,23 @@ function send(item){
   });
 }
 
-
 function login(){
-  if(username.value==="admin" && password.value==="1234"){
-    loginBox.style.display="none";
-    app.style.display="block";
-  }else alert("Invalid login");
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+  if(u==="admin" && p==="1234"){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("app").style.display="block";
+  }else{
+    alert("Invalid login");
+  }
 }
 
-  
 function render(){
+  const inventoryList = document.getElementById("inventoryList");
+  const deletedList = document.getElementById("deletedList");
+  const selectActive = document.getElementById("selectActive");
+  const selectDeleted = document.getElementById("selectDeleted");
+
   inventoryList.innerHTML="";
   deletedList.innerHTML="";
   selectActive.innerHTML="";
@@ -225,14 +297,12 @@ function render(){
         <td>${i.name}</td>
         <td>${i.qty}</td>
         <td>₱${i.price}</td>
-        <td class="${i.qty<50?'stock-low':'stock-ok'}">
-          ${i.qty<50?'LOW':'OK'}
-        </td>
+        <td class="${i.qty<50?'stock-low':'stock-ok'}">${i.qty<50?'LOW':'OK'}</td>
       </tr>`;
       selectActive.innerHTML+=`<option value="${x}">${i.name}</option>`;
     }else{
       deletedList.innerHTML+=`
-      <tr>
+      <tr class="deleted-item">
         <td>${i.name}</td>
         <td>${i.qty}</td>
         <td>₱${i.price}</td>
@@ -243,43 +313,50 @@ function render(){
   });
 }
 
-
 function addItem(){
-  if(!itemName.value||!itemQty.value||!itemPrice.value)return;
+  const itemName = document.getElementById("itemName").value;
+  const itemQty = document.getElementById("itemQty").value;
+  const itemPrice = document.getElementById("itemPrice").value;
+  if(!itemName || !itemQty || !itemPrice) return;
 
   const item={
     id:uid(),
-    name:itemName.value,
-    qty:+itemQty.value,
-    price:+itemPrice.value,
-    status:itemQty.value<50?"LOW":"OK",
+    name:itemName,
+    qty:+itemQty,
+    price:+itemPrice,
+    status:itemQty<50?"LOW":"OK",
     action:"ADD",
     deleted:false
   };
-
   inventory.push(item);
   send(item);
   render();
 
-  itemName.value=itemQty.value=itemPrice.value="";
+  document.getElementById("itemName").value="";
+  document.getElementById("itemQty").value="";
+  document.getElementById("itemPrice").value="";
 }
 
 function deleteItem(){
-  if(selectActive.value==="")return;
-  let i=inventory[selectActive.value];
-  i.deleted=true;
-  i.status="DELETED";
-  i.action="UPDATE";
+  const selectActive = document.getElementById("selectActive");
+  if(selectActive.value==="") return;
+
+  const i = inventory[selectActive.value];
+  i.deleted = true;
+  i.status = "DELETED";
+  i.action = "UPDATE";
   send(i);
   render();
 }
 
 function retrieveItem(){
-  if(selectDeleted.value==="")return;
-  let i=inventory[selectDeleted.value];
-  i.deleted=false;
-  i.status=i.qty<50?"LOW":"OK";
-  i.action="UPDATE";
+  const selectDeleted = document.getElementById("selectDeleted");
+  if(selectDeleted.value==="") return;
+
+  const i = inventory[selectDeleted.value];
+  i.deleted = false;
+  i.status = i.qty<50?"LOW":"OK";
+  i.action = "UPDATE";
   send(i);
   render();
 }
