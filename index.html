@@ -76,12 +76,12 @@ header{
   border-top:6px solid var(--green);
 }
 
+
 input,select,button{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
   border-radius:8px;
   border:1px solid #ccc;
+  padding:10px;
+  margin-bottom:10px;
 }
 button{
   background:var(--green);
@@ -104,6 +104,17 @@ th,td{
 th{background:var(--green);color:#fff}
 .stock-low{color:#c62828;font-weight:bold}
 .stock-ok{color:#0f7a3d;font-weight:bold}
+
+
+.qty-price{
+  display:flex;
+  gap:4px; 
+}
+.qty-price input{
+  width:70px; 
+  padding:6px;
+  text-align:center;
+}
 </style>
 </head>
 
@@ -137,8 +148,10 @@ th{background:var(--green);color:#fff}
 <div class="card">
 <h3>Add Item</h3>
 <input id="itemName" placeholder="Item Name">
-<input id="itemQty" type="number" placeholder="Quantity">
-<input id="itemPrice" type="number" placeholder="Price">
+<div class="qty-price">
+  <input id="itemQty" type="number" placeholder="Qty">
+  <input id="itemPrice" type="number" placeholder="Price">
+</div>
 <button onclick="addItem()">Add</button>
 
 <hr>
@@ -173,7 +186,7 @@ th{background:var(--green);color:#fff}
 
 <script>
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwQc9NMZoWN4AJ3-3W_E-tXr4o_hz4d2u1kNdw8uNNk_OdhN_u_GGkUdL3g-wB_FOof/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxy7S6XmSu_AMb14KThtKTEyWm5fB_Ts0i1NTlbSROhXJHTF8Lj4PQp-rUDo8uWMKJ3/exec";
 
 
 let inventory = [];
@@ -182,7 +195,6 @@ let inventory = [];
 function uid(){
   return "ID-"+Date.now()+"-"+Math.floor(Math.random()*1000);
 }
-
 function send(item){
   fetch(SHEET_URL,{
     method:"POST",
@@ -199,7 +211,7 @@ function login(){
   }else alert("Invalid login");
 }
 
-
+  
 function render(){
   inventoryList.innerHTML="";
   deletedList.innerHTML="";
