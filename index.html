@@ -160,7 +160,7 @@ document.getElementById("date").textContent=new Date().toLocaleString();
 let inventory=[];
 let totalIN=0,totalOUT=0;
 
-const SHEET_URL="PASTE_YOUR_SCRIPT_URL_HERE";
+const SHEET_URL="https://script.google.com/macros/s/AKfycbzd8xrmYJc2S-401DF63TdUlqQecNyjOXqDCsdRpuWUY8As3rxO1OnnlL7V_-jjR69Nxw/exec";
 
 function sendToSheet(data){
   fetch(SHEET_URL,{method:"POST",body:JSON.stringify(data)});
