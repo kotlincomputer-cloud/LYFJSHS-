@@ -160,15 +160,14 @@ document.getElementById("date").textContent=new Date().toLocaleString();
 let inventory=[];
 let totalIN=0,totalOUT=0;
 
-const SHEET_URL="https://script.google.com/macros/s/AKfycbzd8xrmYJc2S-401DF63TdUlqQecNyjOXqDCsdRpuWUY8As3rxO1OnnlL7V_-jjR69Nxw/exec";
+const SHEET_URL="PASTE_YOUR_SCRIPT_URL_HERE";
 
-fetch(SHEET_URL,{
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(data)
-});
+function sendToSheet(data){
+  fetch(SHEET_URL,{
+    method:"POST",
+    body:JSON.stringify(data)
+  });
+}
 
 function showToast(msg,type="success"){
   const t=document.getElementById("toast");
@@ -219,33 +218,68 @@ function display(){
   });
 }
 
+
 function addItem(){
   if(!itemName.value||!itemQty.value||!itemPrice.value){
-    showToast("Complete all fields","error");return;
+    showToast("Complete all fields","error");
+    return;
   }
-  inventory.push({
-    name:itemName.value,
-    qty:+itemQty.value,
-    price:+itemPrice.value,
-    deleted:false
-  });
-  sendToSheet({type:"ADD ITEM",item:itemName.value,qty:itemQty.value,price:itemPrice.value});
+
+  const name=itemName.value.trim().toLowerCase();
+  const qty=+itemQty.value;
+  const price=+itemPrice.value;
+
+  const index=inventory.findIndex(i =>
+    i.name.toLowerCase()===name && !i.deleted
+  );
+
+  if(index!==-1){
+    inventory[index].qty+=qty;
+    sendToSheet({
+      type:"ADD QTY",
+      item:inventory[index].name,
+      qty:qty,
+      price:price
+    });
+    showToast("Quantity updated");
+  }else{
+    inventory.push({
+      name:itemName.value,
+      qty:qty,
+      price:price,
+      deleted:false
+    });
+    sendToSheet({
+      type:"ADD ITEM",
+      item:itemName.value,
+      qty:qty,
+      price:price
+    });
+    showToast("New item added");
+  }
+
   itemName.value=itemQty.value=itemPrice.value="";
-  display(); showToast("Item added");
+  display();
 }
 
 function deleteItem(){
   if(activeSelect.value==="")return;
   inventory[activeSelect.value].deleted=true;
-  sendToSheet({type:"DELETE",item:inventory[activeSelect.value].name});
-  display(); showToast("Item deleted");
+  sendToSheet({
+    type:"DELETE",
+    item:inventory[activeSelect.value].name
+  });
+  display();showToast("Item deleted");
 }
 
 function retrieveItem(){
   if(deletedSelect.value==="")return;
   inventory[deletedSelect.value].deleted=false;
-  sendToSheet({type:"RETRIEVE",item:inventory[deletedSelect.value].name});
-  display(); showToast("Item retrieved");
+  sendToSheet({
+    type:"RETRIEVE",
+    item:inventory[deletedSelect.value].name
+  });
+  display();showToast("Item retrieved");
 }
 
 function processDelivery(){
@@ -257,8 +291,8 @@ function processDelivery(){
     showToast("Not enough stock","error");return;
   }
 
-  if(deliveryType.value==="IN"){i.qty+=q; totalIN+=q;}
-  else{i.qty-=q; totalOUT+=q;}
+  if(deliveryType.value==="IN"){i.qty+=q;totalIN+=q;}
+  else{i.qty-=q;totalOUT+=q;}
 
   totalIn.textContent=totalIN;
   totalOut.textContent=totalOUT;
@@ -266,15 +300,17 @@ function processDelivery(){
 
   sendToSheet({
     type:"DELIVERY "+deliveryType.value,
-    item:i.name,qty:q,
+    item:i.name,
+    qty:q,
     school:schoolName.value,
     office:supplyOffice.value
   });
 
   deliveryQty.value="";
-  display(); showToast("Delivery recorded");
+  display();showToast("Delivery recorded");
 }
 </script>
 
 </body>
 </html>
+
