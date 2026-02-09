@@ -63,6 +63,7 @@ footer{text-align:center;font-size:13px;color:#555}
 
 <body>
 
+
 <div class="login" id="loginBox">
   <img class="login-logo" src="1768986500105.jpg">
   <h3>Admin Login</h3>
@@ -70,6 +71,7 @@ footer{text-align:center;font-size:13px;color:#555}
   <input id="password" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
 </div>
+
 
 <div class="wrap" id="app">
 <header>
@@ -81,6 +83,7 @@ footer{text-align:center;font-size:13px;color:#555}
 </header>
 
 <div class="main">
+
 <aside class="sidebar">
 <strong>Inventory Links</strong><br><br>
 <a href="https://docs.google.com/spreadsheets" target="_blank">📄 Google Sheets</a>
@@ -90,46 +93,41 @@ footer{text-align:center;font-size:13px;color:#555}
 
 
 <div class="card">
-<h3>Add Item</h3>
+<h3>Item Transaction</h3>
+
 <input id="itemName" placeholder="Item Name">
+
 <div class="qty-price">
   <input id="itemQty" type="number" placeholder="Qty">
-  <input id="itemPrice" type="number" placeholder="Price">
+  <input id="itemPrice" type="number" placeholder="Price (ADD only)">
 </div>
-<button onclick="addItem()">Add</button>
+
+<input id="schoolName" placeholder="School Name">
+<input id="supplyOffice" placeholder="Supply Office">
+
+<select id="processType">
+  <option value="ADD">ADD (New Item)</option>
+  <option value="IN">IN (Add Stock)</option>
+  <option value="OUT">OUT (Release Stock)</option>
+</select>
+
+<button onclick="processItem()">PROCESS ITEM</button>
 
 <hr>
-<select id="activeSelect"></select>
-<button class="delete" onclick="deleteItem()">Delete</button>
+<p>Total IN: <span id="totalIn">0</span></p>
+<p>Total OUT: <span id="totalOut">0</span></p>
+<p><strong>Outstanding Balance: <span id="outBalance">0</span></strong></p>
+</div>
 
+
+<div class="card">
+<h3>Inventory</h3>
 <table>
 <thead>
 <tr><th>Item</th><th>Qty</th><th>Price</th><th>Status</th></tr>
 </thead>
 <tbody id="inventoryList"></tbody>
 </table>
-</div>
-
-
-<div class="card">
-<h3>Delivery IN / OUT</h3>
-<input id="schoolName" placeholder="Pangalan ng School">
-<input id="supplyOffice" placeholder="Supply Office">
-
-<select id="deliveryItem"></select>
-<div class="qty-price">
-  <input id="deliveryQty" type="number" placeholder="Qty">
-  <select id="deliveryType">
-    <option value="IN">IN</option>
-    <option value="OUT">OUT</option>
-  </select>
-</div>
-<button onclick="processDelivery()">Process</button>
-
-<hr>
-<p>Total IN: <span id="totalIn">0</span></p>
-<p>Total OUT: <span id="totalOut">0</span></p>
-<p><strong>Outstanding Balance: <span id="outBalance">0</span></strong></p>
 </div>
 
 
@@ -185,9 +183,7 @@ function login(){
 function display(){
   inventoryList.innerHTML="";
   deletedList.innerHTML="";
-  activeSelect.innerHTML="";
   deletedSelect.innerHTML="";
-  deliveryItem.innerHTML="";
 
   inventory.forEach((i,x)=>{
     if(!i.deleted){
@@ -200,8 +196,6 @@ function display(){
           ${i.qty<50?'Low':'OK'}
         </td>
       </tr>`;
-      activeSelect.innerHTML+=`<option value="${x}">${i.name}</option>`;
-      deliveryItem.innerHTML+=`<option value="${x}">${i.name}</option>`;
     }else{
       deletedList.innerHTML+=`
       <tr class="deleted">
@@ -215,62 +209,56 @@ function display(){
   });
 }
 
-function addItem(){
-  if(!itemName.value||!itemQty.value||!itemPrice.value){
-    showToast("Complete all fields","error");return;
-  }
-  inventory.push({
-    name:itemName.value,
-    qty:+itemQty.value,
-    price:+itemPrice.value,
-    deleted:false
-  });
-  sendToSheet({type:"ADD ITEM",item:itemName.value,qty:itemQty.value,price:itemPrice.value});
-  itemName.value=itemQty.value=itemPrice.value="";
-  display(); showToast("Item added");
-}
+function processItem(){
+  const name=itemName.value.trim();
+  const qty=+itemQty.value;
+  const price=+itemPrice.value;
+  const type=processType.value;
 
-function deleteItem(){
-  if(activeSelect.value==="")return;
-  inventory[activeSelect.value].deleted=true;
-  sendToSheet({type:"DELETE",item:inventory[activeSelect.value].name});
-  display(); showToast("Item deleted");
+  if(!name||!qty){
+    showToast("Complete required fields","error");return;
+  }
+
+  let idx=inventory.findIndex(i=>i.name.toLowerCase()===name.toLowerCase());
+
+  if(type==="ADD"){
+    if(idx!==-1){showToast("Item already exists","error");return;}
+    inventory.push({name,qty,price,deleted:false});
+    sendToSheet({type:"ADD ITEM",item:name,qty,price});
+    showToast("Item added");
+  }else{
+    if(idx===-1){showToast("Item not found","error");return;}
+    let i=inventory[idx];
+    if(type==="OUT"&&i.qty<qty){showToast("Not enough stock","error");return;}
+
+    if(type==="IN"){i.qty+=qty;totalIN+=qty;}
+    else{i.qty-=qty;totalOUT+=qty;}
+
+    totalIn.textContent=totalIN;
+    totalOut.textContent=totalOUT;
+    outBalance.textContent=totalIN-totalOUT;
+
+    sendToSheet({
+      type:"DELIVERY "+type,
+      item:name,qty,
+      school:schoolName.value,
+      office:supplyOffice.value
+    });
+    showToast("Transaction recorded");
+  }
+
+  itemName.value=itemQty.value=itemPrice.value="";
+  display();
 }
 
 function retrieveItem(){
   if(deletedSelect.value==="")return;
   inventory[deletedSelect.value].deleted=false;
   sendToSheet({type:"RETRIEVE",item:inventory[deletedSelect.value].name});
-  display(); showToast("Item retrieved");
-}
-
-function processDelivery(){
-  const i=inventory[deliveryItem.value];
-  const q=+deliveryQty.value;
-  if(!q){showToast("Enter qty","error");return;}
-
-  if(deliveryType.value==="OUT" && i.qty<q){
-    showToast("Not enough stock","error");return;
-  }
-
-  if(deliveryType.value==="IN"){i.qty+=q; totalIN+=q;}
-  else{i.qty-=q; totalOUT+=q;}
-
-  totalIn.textContent=totalIN;
-  totalOut.textContent=totalOUT;
-  outBalance.textContent=totalIN-totalOUT;
-
-  sendToSheet({
-    type:"DELIVERY "+deliveryType.value,
-    item:i.name,qty:q,
-    school:schoolName.value,
-    office:supplyOffice.value
-  });
-
-  deliveryQty.value="";
-  display(); showToast("Delivery recorded");
+  display();showToast("Item retrieved");
 }
 </script>
 
 </body>
-</html>
+  </html>
+  
