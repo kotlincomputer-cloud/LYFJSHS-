@@ -4,10 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SupplySync — Supply Inventory Tracking System</title>
-<link rel="icon" type="image/png" href="1768986500105.jpg">
-
 <style>
-:root{
+:root {
   --green:#0f7a3d;
   --red:#c62828;
   --shadow:0 6px 18px rgba(0,0,0,.08);
@@ -60,7 +58,6 @@ footer{text-align:center;font-size:13px;color:#555}
 .toast.error{background:var(--red)}
 </style>
 </head>
-
 <body>
 
 
@@ -94,25 +91,19 @@ footer{text-align:center;font-size:13px;color:#555}
 
 <div class="card">
 <h3>Item Transaction</h3>
-
 <input id="itemName" placeholder="Item Name">
-
 <div class="qty-price">
   <input id="itemQty" type="number" placeholder="Qty">
   <input id="itemPrice" type="number" placeholder="Price (ADD only)">
 </div>
-
 <input id="schoolName" placeholder="School Name">
 <input id="supplyOffice" placeholder="Supply Office">
-
 <select id="processType">
   <option value="ADD">ADD (New Item)</option>
   <option value="IN">IN (Add Stock)</option>
   <option value="OUT">OUT (Release Stock)</option>
 </select>
-
 <button onclick="processItem()">PROCESS ITEM</button>
-
 <hr>
 <p>Total IN: <span id="totalIn">0</span></p>
 <p>Total OUT: <span id="totalOut">0</span></p>
@@ -135,7 +126,6 @@ footer{text-align:center;font-size:13px;color:#555}
 <h3>Deleted Items</h3>
 <select id="deletedSelect"></select>
 <button class="retrieve" onclick="retrieveItem()">Retrieve</button>
-
 <table>
 <thead>
 <tr><th>Item</th><th>Qty</th><th>Price</th><th>Status</th></tr>
@@ -145,7 +135,6 @@ footer{text-align:center;font-size:13px;color:#555}
 </div>
 
 <footer>Last Updated: <span id="date"></span></footer>
-
 </main>
 </div>
 </div>
@@ -153,43 +142,29 @@ footer{text-align:center;font-size:13px;color:#555}
 <div id="toast" class="toast"></div>
 
 <script>
-async function updateServerTime(){
-  const res = await fetch(SHEET_URL,{
-    method:"POST",
-    body:JSON.stringify({type:"TIME"})
-  });
-  const data = await res.json();
-  document.getElementById("date").textContent = data.time;
-}
-  
-let inventory=[];
-let totalIN=0,totalOUT=0;
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyNThCCiwXUqkG3uVfLvZBkNiYIcxUA6othCpN3MdaCxQjFU9VNu1yHa1VIBVzPBilt6g/exec"; 
+let inventory = [];
+let totalIN = 0, totalOUT = 0;
 
-const SHEET_URL="https://script.google.com/macros/s/AKfycbzcr5l_jBSpyTQD6tfwJwqwdRRdEsHmSJ_3gEUXOeQQFmKW3k2u60XowvrDng0EVLH1kw/exec";
 
-function sendToSheet(data){
-  fetch(SHEET_URL,{method:"POST",body:JSON.stringify(data)});
-}
-
-function showToast(msg,type="success"){
+function showToast(msg, type="success"){
   const t=document.getElementById("toast");
   t.textContent=msg;
   t.className="toast show";
-  if(type==="error")t.classList.add("error");
+  if(type==="error") t.classList.add("error");
   setTimeout(()=>t.className="toast",3000);
 }
+
 
 function login(){
   if(username.value==="admin" && password.value==="1234"){
     loginBox.style.display="none";
     app.style.display="block";
-    updateServerTime();
-    setInterval(updateServerTime,1000);
+    updateServerTime(); 
     showToast("Login successful");
-  }else{
-    showToast("Invalid login","error");
-  }
-  }
+  }else showToast("Invalid login","error");
+}
+
 
 function display(){
   inventoryList.innerHTML="";
@@ -199,77 +174,96 @@ function display(){
   inventory.forEach((i,x)=>{
     if(!i.deleted){
       inventoryList.innerHTML+=`
-      <tr>
-        <td>${i.name}</td>
-        <td>${i.qty}</td>
-        <td>₱${i.price}</td>
-        <td class="${i.qty<50?'stock-low':'stock-ok'}">
-          ${i.qty<50?'Low':'OK'}
-        </td>
-      </tr>`;
+        <tr>
+          <td>${i.name}</td>
+          <td>${i.qty}</td>
+          <td>₱${i.price}</td>
+          <td class="${i.qty<50?'stock-low':'stock-ok'}">${i.qty<50?'Low':'OK'}</td>
+        </tr>`;
     }else{
       deletedList.innerHTML+=`
-      <tr class="deleted">
-        <td>${i.name}</td>
-        <td>${i.qty}</td>
-        <td>₱${i.price}</td>
-        <td>DELETED</td>
-      </tr>`;
+        <tr class="deleted">
+          <td>${i.name}</td>
+          <td>${i.qty}</td>
+          <td>₱${i.price}</td>
+          <td>DELETED</td>
+        </tr>`;
       deletedSelect.innerHTML+=`<option value="${x}">${i.name}</option>`;
     }
   });
 }
 
-function processItem(){
+
+async function updateServerTime(){
+  try{
+    const res = await fetch(SHEET_URL); 
+    const data = await res.json();
+    document.getElementById("date").textContent = data.time;
+  }catch(err){
+    document.getElementById("date").textContent = "Time error";
+  }
+}
+
+  
+async function processItem(){
   const name=itemName.value.trim();
   const qty=+itemQty.value;
   const price=+itemPrice.value;
   const type=processType.value;
 
-  if(!name||!qty){
-    showToast("Complete required fields","error");return;
+  if(!name || !qty){
+    showToast("Complete required fields","error"); return;
   }
 
   let idx=inventory.findIndex(i=>i.name.toLowerCase()===name.toLowerCase());
 
   if(type==="ADD"){
-    if(idx!==-1){showToast("Item already exists","error");return;}
-    inventory.push({name,qty,price,deleted:false});
-    sendToSheet({type:"ADD ITEM",item:name,qty,price});
+    if(idx!==-1){showToast("Item already exists","error"); return;}
+    inventory.push({name, qty, price, deleted:false});
     showToast("Item added");
   }else{
-    if(idx===-1){showToast("Item not found","error");return;}
+    if(idx===-1){showToast("Item not found","error"); return;}
     let i=inventory[idx];
-    if(type==="OUT"&&i.qty<qty){showToast("Not enough stock","error");return;}
+    if(type==="OUT" && i.qty<qty){showToast("Not enough stock","error"); return;}
 
-    if(type==="IN"){i.qty+=qty;totalIN+=qty;}
-    else{i.qty-=qty;totalOUT+=qty;}
+    if(type==="IN"){ i.qty += qty; totalIN += qty; }
+    else { i.qty -= qty; totalOUT += qty; }
 
-    totalIn.textContent=totalIN;
-    totalOut.textContent=totalOUT;
-    outBalance.textContent=totalIN-totalOUT;
-
-    sendToSheet({
-      type:"DELIVERY "+type,
-      item:name,qty,
-      school:schoolName.value,
-      office:supplyOffice.value
-    });
-    showToast("Transaction recorded");
+    document.getElementById("totalIn").textContent = totalIN;
+    document.getElementById("totalOut").textContent = totalOUT;
+    document.getElementById("outBalance").textContent = totalIN - totalOUT;
   }
 
-  itemName.value=itemQty.value=itemPrice.value="";
   display();
+
+  
+  try{
+    await fetch(SHEET_URL,{
+      method:"POST",
+      body:JSON.stringify({
+        type:type,
+        item:name,
+        qty:qty,
+        price:price,
+        school:schoolName.value,
+        office:supplyOffice.value
+      })
+    });
+  }catch(err){
+    showToast("Failed to log","error");
+  }
+
+  
+  itemName.value = itemQty.value = itemPrice.value = "";
 }
+
 
 function retrieveItem(){
-  if(deletedSelect.value==="")return;
+  if(deletedSelect.value==="") return;
   inventory[deletedSelect.value].deleted=false;
-  sendToSheet({type:"RETRIEVE",item:inventory[deletedSelect.value].name});
-  display();showToast("Item retrieved");
+  showToast("Item retrieved");
+  display();
 }
 </script>
-
 </body>
-  </html>
-  
+</html>
