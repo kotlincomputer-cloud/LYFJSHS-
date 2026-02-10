@@ -165,7 +165,7 @@ async function updateServerTime(){
 let inventory=[];
 let totalIN=0,totalOUT=0;
 
-const SHEET_URL="https://script.google.com/macros/s/AKfycbx9qnUjMWv7KY0pzwFwsyQUicXtyyMRpXCOhH4BJTkboSCfDytnB8nMpM1h0s5oSNttKQ/exec";
+const SHEET_URL="https://script.google.com/macros/s/AKfycbxGdgEiGeGn1r8mqQFk7Q3yMvsnD_kM9_7Yf-fBFje7MyRrh-RPqRekeA-jrAhaccevtQ/exec";
 
 function sendToSheet(data){
   fetch(SHEET_URL,{method:"POST",body:JSON.stringify(data)});
