@@ -158,7 +158,7 @@ document.getElementById("date").textContent=new Date().toLocaleString();
 let inventory=[];
 let totalIN=0,totalOUT=0;
 
-const SHEET_URL="https://script.google.com/macros/s/AKfycbxAcbtk-7YfjcT0z4Gvwci3eOkhAtV6VysIKI343nvvh-Hb5UWJMf-VIm4dMv2mDne_0Q/exec";
+const SHEET_URL="https://script.google.com/macros/s/AKfycbx9qnUjMWv7KY0pzwFwsyQUicXtyyMRpXCOhH4BJTkboSCfDytnB8nMpM1h0s5oSNttKQ/exec";
 
 function sendToSheet(data){
   fetch(SHEET_URL,{method:"POST",body:JSON.stringify(data)});
