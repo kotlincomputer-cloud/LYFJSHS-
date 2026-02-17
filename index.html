@@ -83,7 +83,6 @@ opacity:0;transform:translateY(-20px);transition:.4s
 <button onclick="login()">Login</button>
 </div>
 
-
 <div class="wrap" id="app">
 
 <header>
@@ -94,14 +93,12 @@ opacity:0;transform:translateY(-20px);transition:.4s
 </div>
 </header>
 
-
 <div class="main">
 
 <aside class="sidebar">
 <strong>Inventory Links</strong><br><br>
 <a href="https://docs.google.com/spreadsheets" target="_blank">📄 Google Sheets</a>
 </aside>
-
 
 <main>
 
@@ -138,7 +135,6 @@ opacity:0;transform:translateY(-20px);transition:.4s
 <p><strong>Outstanding Balance: <span id="outBalance">0</span></strong></p>
 </div>
 
-
 <div class="card">
 <h3>Inventory</h3>
 <table>
@@ -148,7 +144,6 @@ opacity:0;transform:translateY(-20px);transition:.4s
 <tbody id="inventoryList"></tbody>
 </table>
 </div>
-
 
 <div class="card">
 <h3>Deleted Items</h3>
@@ -171,14 +166,12 @@ opacity:0;transform:translateY(-20px);transition:.4s
 
 <div id="toast" class="toast"></div>
 
-
 <script>
-const SHEET_URL="https://script.google.com/macros/s/AKfycbzcWh9UR8oqt6tDTRDGKKhWH0yaSrl4sDaY_6YDClsM3c1R1j-oqUkl6QFUFPMeHwEVkw/exec";
+const SHEET_URL="https://script.google.com/macros/s/AKfycbyV4XsvpvvfDGihFqvxDYQ0tsgZC9bAQO0NbHCKEeCG3tOxDY6xF44JgwOq4-OMOUaYTg/exec";
 
 let inventory=[];
 let totalIN=0;
 let totalOUT=0;
-
 
 function showToast(msg,type="success"){
 const t=document.getElementById("toast");
@@ -187,7 +180,6 @@ t.className="toast show";
 if(type==="error") t.classList.add("error");
 setTimeout(()=>t.className="toast",3000);
 }
-
 
 function login(){
 if(username.value==="admin" && password.value==="1234"){
@@ -198,7 +190,6 @@ loadItemDropdown();
 showToast("Login successful");
 }else showToast("Invalid login","error");
 }
-
 
 function display(){
 inventoryList.innerHTML="";
@@ -231,7 +222,6 @@ deletedSelect.innerHTML+=`<option value="${x}">${i.name}</option>`;
 loadItemDropdown();
 }
 
-
 function loadItemDropdown(){
 const select=document.getElementById("itemName");
 select.innerHTML='<option value="">Select Item</option>';
@@ -242,7 +232,6 @@ select.innerHTML+=`<option value="${i.name}">${i.name}</option>`;
 });
 }
 
-
 async function updateServerTime(){
 try{
 const res=await fetch(SHEET_URL);
@@ -252,7 +241,6 @@ date.textContent=data.time;
 date.textContent="Time error";
 }
 }
-
 
 async function processItem(){
 
@@ -265,6 +253,8 @@ if(newItemName.value.trim()!==""){
 name=newItemName.value.trim();
 }
 
+
+
 if(type==="ADD"){
 
 if(!name){
@@ -273,15 +263,38 @@ return;
 }
 
 let exist=inventory.find(i=>i.name.toLowerCase()===name.toLowerCase());
-if(exist){showToast("Item already exists","error");return;}
-
-inventory.push({name,qty,price,deleted:false});
-showToast("Item added");
-
-newItemName.value="";
-display();
+if(exist){
+showToast("Item already exists","error");
 return;
 }
+
+inventory.push({name,qty,price,deleted:false});
+display();
+showToast("Item added");
+
+
+try{
+await fetch(SHEET_URL,{
+method:"POST",
+body:JSON.stringify({
+type:"ADD",
+item:name,
+qty:qty||0,
+price:price||0,
+school:schoolName.value,
+office:supplyOffice.value
+})
+});
+}catch{
+showToast("Failed to log","error");
+}
+
+newItemName.value="";
+itemQty.value="";
+itemPrice.value="";
+return;
+}
+
 
 
 if(!name||!qty){
@@ -290,7 +303,10 @@ return;
 }
 
 let idx=inventory.findIndex(i=>i.name===name);
-if(idx===-1){showToast("Item not found","error");return;}
+if(idx===-1){
+showToast("Item not found","error");
+return;
+}
 
 let i=inventory[idx];
 
@@ -308,12 +324,14 @@ outBalance.textContent=totalIN-totalOUT;
 
 display();
 
-
 try{
 await fetch(SHEET_URL,{
 method:"POST",
 body:JSON.stringify({
-type,item:name,qty,price,
+type,
+item:name,
+qty,
+price,
 school:schoolName.value,
 office:supplyOffice.value
 })
@@ -326,7 +344,6 @@ itemQty.value="";
 itemPrice.value="";
 }
 
-
 function retrieveItem(){
 if(deletedSelect.value==="")return;
 inventory[deletedSelect.value].deleted=false;
@@ -336,4 +353,4 @@ display();
 </script>
 
 </body>
-  </html>
+</html>
