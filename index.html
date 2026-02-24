@@ -128,6 +128,11 @@ opacity:0;transform:translateY(-20px);transition:.4s
 
 <button onclick="processItem()">PROCESS ITEM</button>
 
+  
+<button onclick="deleteItem()" style="background:#c62828;margin-top:6px">
+DELETE ITEM
+</button>
+
 <hr>
 
 <p>Total IN: <span id="totalIn">0</span></p>
@@ -253,8 +258,6 @@ if(newItemName.value.trim()!==""){
 name=newItemName.value.trim();
 }
 
-
-
 if(type==="ADD"){
 
 if(!name){
@@ -271,7 +274,6 @@ return;
 inventory.push({name,qty,price,deleted:false});
 display();
 showToast("Item added");
-
 
 try{
 await fetch(SHEET_URL,{
@@ -294,8 +296,6 @@ itemQty.value="";
 itemPrice.value="";
 return;
 }
-
-
 
 if(!name||!qty){
 showToast("Complete fields","error");
@@ -344,6 +344,29 @@ itemQty.value="";
 itemPrice.value="";
 }
 
+
+function deleteItem(){
+
+const name = itemName.value;
+
+if(!name){
+showToast("Select item to delete","error");
+return;
+}
+
+let idx = inventory.findIndex(i=>i.name===name);
+
+if(idx===-1){
+showToast("Item not found","error");
+return;
+}
+
+inventory[idx].deleted = true;
+
+showToast("Item deleted");
+display();
+}
+
 function retrieveItem(){
 if(deletedSelect.value==="")return;
 inventory[deletedSelect.value].deleted=false;
@@ -353,4 +376,4 @@ display();
 </script>
 
 </body>
-</html>
+                                               </html>
